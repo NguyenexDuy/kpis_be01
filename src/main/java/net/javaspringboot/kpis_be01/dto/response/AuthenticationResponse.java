@@ -1,13 +1,14 @@
 package net.javaspringboot.kpis_be01.dto.response;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)  // nếu khonong định nghĩa thì các thuộc tính là private
+
 public class AuthenticationResponse {
     String token;
     boolean authenticated;

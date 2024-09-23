@@ -1,5 +1,6 @@
 package net.javaspringboot.kpis_be01.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class ManagerAssessMember {
     @Column
     private String position;//cấp nhân sự của người đc đánh giá
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user", referencedColumnName = "username")
     private User username;
