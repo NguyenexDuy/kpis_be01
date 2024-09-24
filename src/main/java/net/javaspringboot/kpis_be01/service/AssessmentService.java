@@ -17,8 +17,7 @@ public class AssessmentService {
 
     @Autowired
    private ManagerAssessRepository managerAssessRepository;
-    @Autowired
-    private SelfAccessStaffRepository selfAccessStaffRepository;
+
     @Autowired
     private MemberAssessManagerRepository memberAssessManagerRepository;
 
@@ -29,14 +28,14 @@ public class AssessmentService {
     private StaffRepository staffRepository;
     @Autowired
     private SelfAssessManagerRepository selfAssessManagerRepository;
+    @Autowired
+    private  SeflAssessStaffRepository selfAccessStaffRepository;
 
     public List<ManagerAssessMember> getAllResultManagerAssesMemberByRoom_Date(String room_name,String date){
         return  managerAssessRepository.getAllResultManagerAssesMemberByRoom_Date(room_name,date);
     }
 
-    public List<SelfAssessStaff> getAllResultSelfAssessStaff(String room_name){
-        return  selfAccessStaffRepository.getAllResultSelfAssessStaff(room_name);
-    }
+
 
 
     public  List<MemberAssessManager> getAllResultMemberAssessManager(String room_name, String date){
@@ -74,4 +73,12 @@ public class AssessmentService {
     }
 
     public List<SelfAssessManager> getAllSelfAssessManagerByDate(String date){return selfAssessManagerRepository.getAllByDate(date);}
+
+    public List<ManagerAssessMember> getAllRessultManagerAssessYourSelfByStaffCodeRoom(String staff_code, String date){
+        return  managerAssessRepository.getAllResultManagerAssessMemberByStaffCodeRoom(staff_code,date);
+    }
+
+    public List<SelfAssessStaff> getSeflAssessStaffByStaffCode(String staff_code){
+        return  selfAccessStaffRepository.getSeflAssessStaffByStaffCode(staff_code);
+    }
 }

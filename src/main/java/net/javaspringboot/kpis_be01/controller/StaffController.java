@@ -1,7 +1,9 @@
 package net.javaspringboot.kpis_be01.controller;
 import lombok.extern.slf4j.Slf4j;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
+import net.javaspringboot.kpis_be01.entity.ManagerAssessMember;
 import net.javaspringboot.kpis_be01.entity.MemberAssessment;
+import net.javaspringboot.kpis_be01.entity.SelfAssessStaff;
 import net.javaspringboot.kpis_be01.entity.Staffs;
 import net.javaspringboot.kpis_be01.service.AssessmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,35 @@ public class StaffController {
                 .result(membersList)
                 .code(1000)
                 .message("SUCCESS")
+                .build();
+    }
+
+    //xem cấp trên đánh giá
+    @GetMapping("/getManagerAssessYourSelf")
+    ApiResponse<List<ManagerAssessMember>> getManagerAssessYourSelf(){
+        var authentication=SecurityContextHolder.getContext().getAuthentication();
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+        log.info("Username:{}",authentication.getName());
+        List<ManagerAssessMember> mList=assessmentService.getAllRessultManagerAssessYourSelfByStaffCodeRoom(staffs.getStaff_code(),staffs.getRoom_name());
+
+        return  ApiResponse.<List<ManagerAssessMember>>builder()
+                .message("SUCESS")
+                .result(mList)
+                .code(1000)
+                .build();
+    }
+
+    //kết quả tự đánh giá
+    @GetMapping("/getSeflAssessStaff")
+    ApiResponse<List<SelfAssessStaff>> getSeflAssessStaffByStaffCode(){
+        var authentication=SecurityContextHolder.getContext().getAuthentication();
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+        log.info("Username:{}",authentication.getName());
+        List<SelfAssessStaff> mList=assessmentService.getSeflAssessStaffByStaffCode(staffs.getStaff_code());
+        return ApiResponse.<List<SelfAssessStaff>>builder()
+                .message("SUCCESS")
+                .code(1000)
+                .result(mList)
                 .build();
     }
 }
