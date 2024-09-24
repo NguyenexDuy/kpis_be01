@@ -8,6 +8,6 @@ import java.util.List;
 public interface ManagerAssessRepository extends JpaRepository<ManagerAssessMember,Long> {
 
 
-    @Query(value = "select * from manager_assess_member where room_name = :room_name",nativeQuery = true)
-    List<ManagerAssessMember> getAllResultManagerAssesMember(String room_name);
+    @Query(value = "select * from manager_assess_member where room_name = :room_name and created_at=:date",nativeQuery = true)
+    List<ManagerAssessMember> getAllResultManagerAssesMemberByRoom_Date(String room_name,String date);
 }

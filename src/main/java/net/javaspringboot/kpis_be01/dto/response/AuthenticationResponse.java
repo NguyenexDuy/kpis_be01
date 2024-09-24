@@ -2,6 +2,9 @@ package net.javaspringboot.kpis_be01.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import net.javaspringboot.kpis_be01.entity.Role;
+
+import java.util.Set;
 
 @Data
 @Builder
@@ -11,5 +14,6 @@ import lombok.experimental.FieldDefaults;
 
 public class AuthenticationResponse {
     String token;
+    Set<Role> role;
     boolean authenticated;
 }

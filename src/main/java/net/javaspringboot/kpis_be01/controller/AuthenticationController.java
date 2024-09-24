@@ -26,7 +26,7 @@ public class AuthenticationController {
     ApiResponse<AuthenticationResponse> authenticationResponseApiResponse(@RequestBody AuthenticationRequest request){
         var result=authenticationService.authenticate(request);
         return  ApiResponse.<AuthenticationResponse>builder()
-                .message("Login assess")
+                .message("SUCCESS")
                 .result(result)
                 .build();
     }
