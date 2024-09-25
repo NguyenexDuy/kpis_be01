@@ -23,14 +23,20 @@ public class AssessmentService {
 
     @Autowired
     private MemberAssessRepository memberAssessRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private StaffRepository staffRepository;
     @Autowired
     private SelfAssessManagerRepository selfAssessManagerRepository;
     @Autowired
-    private  SeflAssessStaffRepository selfAccessStaffRepository;
+    private SelfAssessStaffRepository selfAccessStaffRepository;
 
+
+    public  Optional<User> getUserInformation(String username){
+        return userRepository.findByUsername(username);
+    }
     public List<ManagerAssessMember> getAllResultManagerAssesMemberByRoom_Date(String room_name,String date){
         return  managerAssessRepository.getAllResultManagerAssesMemberByRoom_Date(room_name,date);
     }
@@ -78,7 +84,16 @@ public class AssessmentService {
         return  managerAssessRepository.getAllResultManagerAssessMemberByStaffCodeRoom(staff_code,date);
     }
 
-    public List<SelfAssessStaff> getSeflAssessStaffByStaffCode(String staff_code){
-        return  selfAccessStaffRepository.getSeflAssessStaffByStaffCode(staff_code);
+    public List<SelfAssessStaff> getSelfAssessStaffByStaffCode(String staff_code){
+        return  selfAccessStaffRepository.getSelfAssessStaffByStaffCode(staff_code);
     }
+    public  List<SelfAssessStaff> getSelfAssessStaffByRoomDate(String room_name, String date){
+        return  selfAccessStaffRepository.getSelfAssessStaffByRoomDate(room_name,date);
+    }
+
+    public  List<SelfAssessStaff> getSeflAssessStaffByUserDate(String create_by,String date)
+    {
+        return  selfAccessStaffRepository.getSelfAllByUserDate(create_by,date);
+    }
+
 }

@@ -1,6 +1,7 @@
 package net.javaspringboot.kpis_be01.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,6 +40,7 @@ public class User implements Serializable {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "rank_code",referencedColumnName = "rank_code")
+    @JsonIgnore
     private RankStaff rank_code;//cấp bậc cụ thể (để tính kpi năm)
 
     @Column

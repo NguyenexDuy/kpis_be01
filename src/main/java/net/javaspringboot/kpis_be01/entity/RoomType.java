@@ -1,6 +1,7 @@
 package net.javaspringboot.kpis_be01.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,8 @@ public class RoomType implements Serializable {
     private String room_symbol;
     //user bgđ phụ trách khoa/phòng
     @ManyToOne(cascade = CascadeType.ALL)
+
+    @JsonIgnore
     @JoinColumn(name = "user_name", referencedColumnName = "username")
     private User user;//dùng để liên kết dữ liệu
     @Column

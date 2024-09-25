@@ -91,11 +91,36 @@ public class StaffController {
         var authentication=SecurityContextHolder.getContext().getAuthentication();
         Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
         log.info("Username:{}",authentication.getName());
-        List<SelfAssessStaff> mList=assessmentService.getSeflAssessStaffByStaffCode(staffs.getStaff_code());
+        List<SelfAssessStaff> mList=assessmentService.getSelfAssessStaffByStaffCode(staffs.getStaff_code());
         return ApiResponse.<List<SelfAssessStaff>>builder()
                 .message("SUCCESS")
                 .code(1000)
                 .result(mList)
                 .build();
     }
+    //kết quả nhân viên tự đánh giá
+    @GetMapping("/getResultSelfAssessStaff")
+    public  ApiResponse<List<SelfAssessStaff>> getAllSelfAssessStaff(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        String date=month+"/"+year;
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+        log.info("Username:{}",authentication.getName());
+        List<SelfAssessStaff> mList=new ArrayList<>();
+        if(hasRole("Manager") || hasRole("Admin") || hasRole("Director")){
+           mList=assessmentService.getSelfAssessStaffByRoomDate(staffs.getRoom_name(),date);
+
+        }
+        else {
+            mList=assessmentService.getSeflAssessStaffByUserDate(staffs.getUsername().getUsername(),date);
+
+        }
+        return  ApiResponse.<List<SelfAssessStaff>>builder()
+                .message("SUCCESS")
+                .result(mList)
+                .code(1000)
+                .build();
+    }
+
+    //kết quả đánh giá lãnh đạo
+
 }
