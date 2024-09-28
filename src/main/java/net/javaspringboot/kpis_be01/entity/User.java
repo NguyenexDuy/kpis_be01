@@ -38,9 +38,9 @@ public class User implements Serializable {
     @NotBlank
     private String email;
 
+//    @JsonIgnore
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "rank_code",referencedColumnName = "rank_code")
-    @JsonIgnore
     private RankStaff rank_code;//cấp bậc cụ thể (để tính kpi năm)
 
     @Column

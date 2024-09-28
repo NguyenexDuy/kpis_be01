@@ -1,5 +1,6 @@
 package net.javaspringboot.kpis_be01.controller;
 import lombok.extern.slf4j.Slf4j;
+import net.javaspringboot.kpis_be01.dto.request.ManagerAssesListRequest;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
 import net.javaspringboot.kpis_be01.entity.*;
 import net.javaspringboot.kpis_be01.service.AssessmentService;
@@ -119,6 +120,10 @@ public class ManagerController {
                 }
             }
         }
+        if(hasRole("User")){
+            result=assessmentService.getListMembersAssessManagerByUsernameRoom(staffs.getUsername().getUsername(),staffs.getRoom_name());
+
+        }
         return  ApiResponse.<List<MemberAssessManager>>builder()
                 .result(result)
                 .message("SUCCESS")
@@ -181,6 +186,78 @@ public class ManagerController {
                 .build();
     }
 
+
+    //kết quả đánh giá lãnh đạo
+    @GetMapping("/getResultLeaderAssessManager")
+    public ApiResponse<List<LeaderAssessManager>> getResultLeaderAssessManager(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        String date=month+"/"+year;
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+        log.info("Username:{}",authentication.getName());
+
+        List<LeaderAssessManager> mlist=assessmentService.getListLeaderAssessManagerByRoomDate(staffs.getRoom_name(),date);
+        Iterator<LeaderAssessManager> iterator = mlist.iterator();
+        while (iterator.hasNext()){
+            LeaderAssessManager m=iterator.next();
+            String rank = assessmentService.getStaffByStaffCode(m.getStaff_code()).get().getRank_code();
+            if (hasRole("Manager")){
+                if (manager_rank_list.contains(rank)){
+                    iterator.remove();
+                }
+            } else if (hasRole("Vice_Manager")) {
+                if (manager_rank_list.contains(rank) || vice_rank_list.contains(rank)){
+                    iterator.remove();
+                }
+            } else if (hasRole("Captain")) {
+                if (manager_rank_list.contains(rank) || vice_rank_list.contains(rank) ||
+                        captain_rank_list.contains(rank)){
+                    iterator.remove();
+                }
+            } else if (hasRole("Group_Leader")) {
+                if (manager_rank_list.contains(rank) || vice_rank_list.contains(rank) ||
+                        captain_rank_list.contains(rank) ||  group_rank_list.contains(rank)){
+                    iterator.remove();
+                }
+            }
+        }
+        return  ApiResponse.<List<LeaderAssessManager>>builder()
+                .result(mlist)
+                .code(1000)
+                .message("SUCCESS")
+                .build();
+    }
+
+    //đánh giá lãnh đạo quản lý trực tiếp
+    @GetMapping("/getResultmanagerLeaderAssessment")
+    public ApiResponse<ManagerAssesListRequest> getResultmanagerLeaderAssessment(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        String date=month+"/"+year;
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+        log.info("Username:{}",authentication.getName());
+        List<Staffs> leadersList = new ArrayList<>();
+        //thêm leader phụ trách khoa/phòng của user đó vào phần đánh giá
+        leadersList.add(staffs);
+
+        //loại đi lãnh đạo đã đc quản lý đánh giá trong tháng này rồi
+        Iterator<Staffs> iterator = leadersList.iterator();
+
+        while (iterator.hasNext()){
+            Staffs s = iterator.next();
+            ManagerAssessLeader managerAssessLeader=assessmentService.getObjManagerAssessLeaderByUserNameCodeRoomDate(staffs.getUsername().getUsername(),s.getStaff_code(),s.getRoom_name(),date);
+            if (managerAssessLeader != null){
+                iterator.remove();
+            }
+        }
+        ManagerAssesListRequest managerAssessList = new ManagerAssesListRequest();
+        for (Staffs staffss : leadersList) {
+            managerAssessList.getManagerAssessLeaderList().add(new ManagerAssessLeader(
+                    staffss.getStaff_code(), staffss.getFullname(), staffss.getUsername()));
+        }
+        return ApiResponse.<ManagerAssesListRequest>builder()
+                .message("SUCCESS").code(1000)
+                .result(managerAssessList)
+                .build();
+    }
 
 
 }

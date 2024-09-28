@@ -28,9 +28,8 @@ public class RoomType implements Serializable {
     @Column(unique = true)
     private String room_symbol;
     //user bgđ phụ trách khoa/phòng
-    @ManyToOne(cascade = CascadeType.ALL)
-
     @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_name", referencedColumnName = "username")
     private User user;//dùng để liên kết dữ liệu
     @Column

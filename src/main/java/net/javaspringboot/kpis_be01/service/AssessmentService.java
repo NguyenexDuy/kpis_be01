@@ -2,6 +2,7 @@ package net.javaspringboot.kpis_be01.service;
 
 import net.javaspringboot.kpis_be01.entity.*;
 import net.javaspringboot.kpis_be01.repository.*;
+import net.javaspringboot.kpis_be01.repository.LeaderAssessManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,12 @@ public class AssessmentService {
     private SelfAssessManagerRepository selfAssessManagerRepository;
     @Autowired
     private SelfAssessStaffRepository selfAccessStaffRepository;
+
+    @Autowired
+    private LeaderAssessManagerRepository leaderAssessManager;
+
+    @Autowired
+    private ManagerAssessDirecRepository managerAssessDirecRepository;
 
 
     public  Optional<User> getUserInformation(String username){
@@ -96,4 +103,13 @@ public class AssessmentService {
         return  selfAccessStaffRepository.getSelfAllByUserDate(create_by,date);
     }
 
+    public List<MemberAssessManager> getListMembersAssessManagerByUsernameRoom(String username, String room_name){return memberAssessManagerRepository.findListMemberAssessManagerByUsernameRoom(username, room_name);}
+
+    public List<LeaderAssessManager> getListLeaderAssessManagerByRoomDate(String room_name,String date){
+        return leaderAssessManager.findListLeaderAssessManagerByRoomDate(room_name,date);
+    }
+
+    public ManagerAssessLeader getObjManagerAssessLeaderByUserNameCodeRoomDate(String username, String code, String room_name, String date){
+        return managerAssessDirecRepository.findObjAssessLeaderByStaffCodeRoomMonthYear(username, code, room_name, date);
+    }
 }
