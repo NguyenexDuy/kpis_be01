@@ -13,4 +13,7 @@ public interface ManagerAssessRepository extends JpaRepository<ManagerAssessMemb
 
     @Query(value = "select * from manager_assess_member where staff_code = :staff_code and room_name = :room",nativeQuery = true)
     List<ManagerAssessMember> getAllResultManagerAssessMemberByStaffCodeRoom(String staff_code,String room);
+
+    @Query(value = "select * from manager_assess_member where staff_code = :code and room_symbol = :room and created_at = :date",nativeQuery = true)
+    ManagerAssessMember findObjManagerAssessMemberByCodeRoomSymbolDate(String code, String room, String date);
 }

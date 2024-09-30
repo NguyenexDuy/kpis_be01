@@ -18,7 +18,7 @@ public class UserSevice {
         return  userRepository.findAll();
     }
 
-    public Optional<User> getUserByUsername(String username){
-        return  userRepository.findByUsername(username);
+    public User getUserByUsername(String username){
+        return  userRepository.findByUsername(username).orElse(null);
     }
 }

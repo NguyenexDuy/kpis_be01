@@ -40,6 +40,9 @@ public class AssessmentService {
     @Autowired
     private ManagerAssessDirecRepository managerAssessDirecRepository;
 
+    @Autowired
+    private  ResultRepo resultRepo;
+
 
     public  Optional<User> getUserInformation(String username){
         return userRepository.findByUsername(username);
@@ -47,14 +50,24 @@ public class AssessmentService {
     public List<ManagerAssessMember> getAllResultManagerAssesMemberByRoom_Date(String room_name,String date){
         return  managerAssessRepository.getAllResultManagerAssesMemberByRoom_Date(room_name,date);
     }
+    public List<Staffs> getStaffListByRoom(String room_name){return staffRepository.findByRoomNameLike(room_name);}
 
-
-
+    public List<MemberAssessManager> getListMemberAssessManagerByCodeRoomDate(String code, String room_name, String date){
+        return memberAssessManagerRepository.getListMemberAssessManagerByCodeRoomDate(code, room_name, date);
+    }
+    public ManagerAssessMember getObjManagerAssessMemberByCodeRoomSymbolDate(String code, String room, String date){
+        return managerAssessRepository.findObjManagerAssessMemberByCodeRoomSymbolDate(code, room, date);
+    }
+    public List<MemberAssessment> getMark3MemberAssessByCodeRoomDate(String code, String room_name, String date){
+        return memberAssessRepository.getListMarkOfMemberByCodeRoomDate(code, room_name, date);
+    }
 
     public  List<MemberAssessManager> getAllResultMemberAssessManager(String room_name, String date){
         return  memberAssessManagerRepository.getAllResultMemberAssessManagerByRoomDate(room_name,date);
     }
-
+    public void SaveOrUpdateResultSelfKPI(ResultPersonalKPI result){
+        resultRepo.save(result);
+    }
 
     public Optional<Staffs> getStaffByUserName(String username){
         return  staffRepository.getStaffsByUsername(username);
@@ -105,9 +118,14 @@ public class AssessmentService {
 
     public List<MemberAssessManager> getListMembersAssessManagerByUsernameRoom(String username, String room_name){return memberAssessManagerRepository.findListMemberAssessManagerByUsernameRoom(username, room_name);}
 
-    public List<LeaderAssessManager> getListLeaderAssessManagerByRoomDate(String room_name,String date){
-        return leaderAssessManager.findListLeaderAssessManagerByRoomDate(room_name,date);
+    public List<LeaderAssessManager> getListLeaderAssessManagerByRoomDate(String room_name){
+        return leaderAssessManager.findListLeaderAssessManagerByRoomDate(room_name);
     }
+    public List<ResultPersonalKPI> getListResultPersonalKPIByRoomSymbolDate(String symbol, String date) {
+        return resultRepo.resultListByRoomSymbolDate(symbol, date);
+    }
+    public List<ResultPersonalKPI> getListResultPersonalKPIByDate(String date) {
+        return resultRepo.resultListByDate(date);}
 
     public ManagerAssessLeader getObjManagerAssessLeaderByUserNameCodeRoomDate(String username, String code, String room_name, String date){
         return managerAssessDirecRepository.findObjAssessLeaderByStaffCodeRoomMonthYear(username, code, room_name, date);

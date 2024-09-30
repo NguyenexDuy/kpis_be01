@@ -30,7 +30,7 @@ public class UserController {
     @GetMapping("/getUserInfomation")
      ApiResponse<User>  getUserInfomation(){
         var authentication= SecurityContextHolder.getContext().getAuthentication();
-        User user=userService.getUserByUsername(authentication.getName()).get();
+        User user=userService.getUserByUsername(authentication.getName());
         log.info("Username:{}",authentication.getName());
         return ApiResponse.<User>builder()
                 .code(1000)

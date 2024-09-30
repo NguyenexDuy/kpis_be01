@@ -88,6 +88,9 @@ public class ManagerController {
     }
 
     //kết quả đánh giá cấp quản lý
+
+    // loop qua cái mảng -> lấy từng positon -> query table rank_staff để lấy ra tên rank_name== position
+    // gán cho postiton== rank_name xong trả ra
     @GetMapping("/getResultMemberAssessManager")
     ApiResponse<List<MemberAssessManager>> getResultMemberAssessManager(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
         var authentication= SecurityContextHolder.getContext().getAuthentication();
@@ -179,6 +182,10 @@ public class ManagerController {
                 }
             }
         }
+        for(SelfAssessManager selfMana:selfAssessManagersList){
+            Staffs staffs1=assessmentService.getStaffByStaffCode(selfMana.getStaff_code()).get();
+            selfMana.setRank(staffs1.getUsername().getRank_code().getRank_name());
+        }
         return ApiResponse.<List<SelfAssessManager>>builder()
                 .code(1000)
                 .message("SUCCESS")
@@ -188,38 +195,15 @@ public class ManagerController {
 
 
     //kết quả đánh giá lãnh đạo
+    //xem BGĐ đánh giá
     @GetMapping("/getResultLeaderAssessManager")
-    public ApiResponse<List<LeaderAssessManager>> getResultLeaderAssessManager(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+    public ApiResponse<List<LeaderAssessManager>> getResultLeaderAssessManager(){
         var authentication= SecurityContextHolder.getContext().getAuthentication();
-        String date=month+"/"+year;
         Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
         log.info("Username:{}",authentication.getName());
 
-        List<LeaderAssessManager> mlist=assessmentService.getListLeaderAssessManagerByRoomDate(staffs.getRoom_name(),date);
-        Iterator<LeaderAssessManager> iterator = mlist.iterator();
-        while (iterator.hasNext()){
-            LeaderAssessManager m=iterator.next();
-            String rank = assessmentService.getStaffByStaffCode(m.getStaff_code()).get().getRank_code();
-            if (hasRole("Manager")){
-                if (manager_rank_list.contains(rank)){
-                    iterator.remove();
-                }
-            } else if (hasRole("Vice_Manager")) {
-                if (manager_rank_list.contains(rank) || vice_rank_list.contains(rank)){
-                    iterator.remove();
-                }
-            } else if (hasRole("Captain")) {
-                if (manager_rank_list.contains(rank) || vice_rank_list.contains(rank) ||
-                        captain_rank_list.contains(rank)){
-                    iterator.remove();
-                }
-            } else if (hasRole("Group_Leader")) {
-                if (manager_rank_list.contains(rank) || vice_rank_list.contains(rank) ||
-                        captain_rank_list.contains(rank) ||  group_rank_list.contains(rank)){
-                    iterator.remove();
-                }
-            }
-        }
+        List<LeaderAssessManager> mlist=assessmentService.getListLeaderAssessManagerByRoomDate(staffs.getRoom_name());
+
         return  ApiResponse.<List<LeaderAssessManager>>builder()
                 .result(mlist)
                 .code(1000)
@@ -258,6 +242,7 @@ public class ManagerController {
                 .result(managerAssessList)
                 .build();
     }
+
 
 
 }
