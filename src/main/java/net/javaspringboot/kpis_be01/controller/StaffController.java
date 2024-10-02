@@ -1,5 +1,7 @@
 package net.javaspringboot.kpis_be01.controller;
 import lombok.extern.slf4j.Slf4j;
+import net.javaspringboot.kpis_be01.dto.request.MemberAssessListRequest;
+import net.javaspringboot.kpis_be01.dto.request.SelfAssessStaffRequest;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
 import net.javaspringboot.kpis_be01.entity.*;
 import net.javaspringboot.kpis_be01.service.AssessmentService;
@@ -7,16 +9,10 @@ import net.javaspringboot.kpis_be01.service.MethodService;
 import net.javaspringboot.kpis_be01.service.UserSevice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Year;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static net.javaspringboot.kpis_be01.configuration.checkRoleAccount.hasRole;
 
@@ -230,5 +226,109 @@ public class StaffController {
                 .message("SUCCESS")
                 .build();
 
+    }
+
+    //tự đánh giá bản thân
+    @PostMapping("/saveSelfAssessStaff")
+    public ApiResponse<String> saveSelfAssessStaff(@RequestBody SelfAssessStaffRequest request){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        String date = request.getMonth() + "/" + request.getYear();
+        Staffs staffs = assessmentService.getStaffByUserName(authentication.getName()).get();
+       Optional<SelfAssessStaff>  selfAssess=assessmentService.getObjSelfAsStaff(staffs.getUsername().getUsername(),date);
+        if(selfAssess.isPresent())
+        {
+            return  ApiResponse.<String>builder()
+                    .code(1100)
+                    .message("UNSUCCESS")
+                    .result("Bạn đã đánh giá tháng này!")
+                    .build();
+        }
+        else {
+            log.info("Thuc hien luu du lieu");
+            assessmentService.SaveSelfAsStaff(request);
+            return ApiResponse.<String>builder()
+                    .code(1000)
+                    .message("SUCCESS")
+                    .result("Đánh giá thành công")
+                    .build();
+        }
+    }
+
+
+    // đánh giá các cấp trên
+    @PostMapping("/memberAssessmentManager")
+    public ApiResponse<MemberAssessListRequest> memberAssessmentManager(@RequestParam(value = "month") int month, @RequestParam(value = "year") int year){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Staffs staffs = assessmentService.getStaffByUserName(authentication.getName()).get();
+
+        String date =month + "/" + year;
+        List<MemberAssessManager> mCheckList=assessmentService.getListMemberAssessManagerByUsernameDate(staffs.getUsername().getUsername(),date);
+        List<Staffs> staffsList = assessmentService.getStaffListByRoom(staffs.getUsername().getRoom_type().getRoom_name());
+        Set<Staffs> membersList = new HashSet<Staffs>(methodService.getMemberListByRoomGroup(staffs.getUsername(),staffs));
+        MemberAssessListRequest memberAssessList = new MemberAssessListRequest();
+        //thêm member cấp quản lý vào list đánh giá
+        for (Staffs s:staffsList) {
+            if (s.getRank_code() != null){
+                //dành riêng cho user TTTM và PKHH
+                if (s.getUsername().getRoom_type().getRoom_symbol().equals("DCC") || s.getUsername().getRoom_type().getRoom_symbol().equals("HHC")){
+                    if (s.getRank_code().equals("CEF")){
+                        membersList.add(s);
+                    }
+                    //nếu rank MNG nhưng không phải role Manager thì check thêm group work nếu cùng group thì thêm vào
+                    if ((manager_rank_list.contains(s.getRank_code()) || s.getUsername().getRole_name().getRolename().equals("Group_Leader"))
+                            && staffs.getUsername().getGroup_work().equals(s.getGroup_work())){
+                        membersList.add(s);
+                    }
+                } else {//dành cho các khoa phòng còn lại
+                    if (!member_rank_list.contains(s.getRank_code())){
+                        membersList.add(s);
+                    }
+                }
+            }
+        }
+        Iterator<Staffs> iterator = membersList.iterator();
+        while (iterator.hasNext()){
+            Staffs s = iterator.next();
+
+            //ẩn đi ddt,hst,kty trưởng khoa, phó khoa khác trong list nhân viên đc đánh giá dành cho phó khoa/phòng
+            if (hasRole("Vice_Manager") && (captain_rank_list.contains(s.getRank_code()) || vice_rank_list.contains(s.getRank_code()))){
+                iterator.remove();
+            }
+
+            for (MemberAssessManager m: mCheckList) {
+                if (s.getStaff_code().equals(m.getStaff_code())){
+                    iterator.remove();
+                }
+            }
+        }
+        //ẩn staff nhân viên trong memberList cho đánh giá, list chỉ dành cho nhân viên đánh giá cấp quản lý
+        Iterator<Staffs> iterator_rank = membersList.iterator();
+        while (iterator_rank.hasNext()){
+            Staffs s = iterator_rank.next();
+            if (s.getRank_code() != null){
+                //ẩn đi nhân viên trong list
+                if (member_rank_list.contains(s.getRank_code())){
+                    iterator_rank.remove();
+                }
+                //ẩn đi các trưởng nhóm ko cùng group work đối với các group lead khác
+                if (group_rank_list.contains(s.getRank_code()) && !s.getGroup_work().equals(staffs.getUsername().getGroup_work())){
+                    iterator_rank.remove();
+                }
+                //ẩn đi chính user đang logging
+                else if (s.getUsername().isStatus() && s.getUsername().getUsername().equals(staffs.getUsername().getUsername())) {
+                    iterator_rank.remove();
+                }
+            }
+        }
+        //danh sách quản lý chưa đánh giá tháng này
+        for (Staffs staffss : membersList) {
+            memberAssessList.getMembersAssessList().add(new MemberAssessment(
+                    staffss.getStaff_code(), staffss.getFullname(),staffss.getUsername()));
+        }
+        return  ApiResponse.<MemberAssessListRequest>builder()
+                .code(1000)
+                .message("SUCCESS")
+                .result(memberAssessList)
+                .build();
     }
 }

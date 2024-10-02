@@ -127,6 +127,14 @@ public class ManagerController {
             result=assessmentService.getListMembersAssessManagerByUsernameRoom(staffs.getUsername().getUsername(),staffs.getRoom_name());
 
         }
+
+        for(MemberAssessManager selfMana:result){
+            Staffs staffs1=assessmentService.getStaffByStaffCode(selfMana.getStaff_code()).get();
+            selfMana.setRank_manager(staffs1.getUsername().getRank_code().getRank_name());
+            Staffs staffs2=assessmentService.getStaffByUserName(selfMana.getUnique_username()).get();
+            selfMana.setPosition(staffs2.getUsername().getRank_code().getRank_name());
+        }
+
         return  ApiResponse.<List<MemberAssessManager>>builder()
                 .result(result)
                 .message("SUCCESS")
@@ -152,6 +160,11 @@ public class ManagerController {
                     iterator.remove();
                 }
             }
+        }
+        for(MemberAssessment mem:membersList){
+            Staffs staffs1=assessmentService.getStaffByStaffCode(mem.getStaff_code()).get();
+            mem.setPosition(staffs1.getUsername().getRank_code().getRank_name());
+
         }
         return ApiResponse.<List<MemberAssessment>>builder()
                 .message("SUCCESS")

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SelfAssessStaffRepository extends JpaRepository<SelfAssessStaff,Long> {
 
@@ -16,5 +17,8 @@ public interface SelfAssessStaffRepository extends JpaRepository<SelfAssessStaff
 
     @Query(value = "SELECT * FROM self_assess_staff WHERE created_by = :username and created_at = :date",nativeQuery = true)
     List<SelfAssessStaff> getSelfAllByUserDate(String username, String date);
+
+    @Query(value = "SELECT * FROM self_assess_staff WHERE created_by = :username and created_at = :date",nativeQuery = true)
+    Optional<SelfAssessStaff> getSelfAssessStaffByUserNameDate(String username,String date);
 
 }

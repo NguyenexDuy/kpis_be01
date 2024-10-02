@@ -1,15 +1,19 @@
 package net.javaspringboot.kpis_be01.service;
 
+import lombok.extern.slf4j.Slf4j;
+import net.javaspringboot.kpis_be01.dto.request.SelfAssessStaffRequest;
 import net.javaspringboot.kpis_be01.entity.*;
 import net.javaspringboot.kpis_be01.repository.*;
 import net.javaspringboot.kpis_be01.repository.LeaderAssessManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class AssessmentService {
 
 
@@ -42,6 +46,8 @@ public class AssessmentService {
 
     @Autowired
     private  ResultRepo resultRepo;
+    @Autowired
+    private  SelfAssessStaffRepository  selfAssessStaffRepository;
 
 
     public  Optional<User> getUserInformation(String username){
@@ -52,6 +58,7 @@ public class AssessmentService {
     }
     public List<Staffs> getStaffListByRoom(String room_name){return staffRepository.findByRoomNameLike(room_name);}
 
+    public List<Staffs> getStaffListByRoomGroup(String room_name, String group){return staffRepository.findStaffListByRoomGroupWork(room_name, group);}
     public List<MemberAssessManager> getListMemberAssessManagerByCodeRoomDate(String code, String room_name, String date){
         return memberAssessManagerRepository.getListMemberAssessManagerByCodeRoomDate(code, room_name, date);
     }
@@ -116,6 +123,9 @@ public class AssessmentService {
         return  selfAccessStaffRepository.getSelfAllByUserDate(create_by,date);
     }
 
+    public List<MemberAssessManager> getListMemberAssessManagerByUsernameDate(String username, String date){
+        return memberAssessManagerRepository.findListMemberAssessManagerByUserDate(username, date);
+    }
     public List<MemberAssessManager> getListMembersAssessManagerByUsernameRoom(String username, String room_name){return memberAssessManagerRepository.findListMemberAssessManagerByUsernameRoom(username, room_name);}
 
     public List<LeaderAssessManager> getListLeaderAssessManagerByRoomDate(String room_name){
@@ -129,5 +139,33 @@ public class AssessmentService {
 
     public ManagerAssessLeader getObjManagerAssessLeaderByUserNameCodeRoomDate(String username, String code, String room_name, String date){
         return managerAssessDirecRepository.findObjAssessLeaderByStaffCodeRoomMonthYear(username, code, room_name, date);
+    }
+
+    public  Optional<SelfAssessStaff> getObjSelfAsStaff(String username,String date){
+        return  selfAccessStaffRepository.getSelfAssessStaffByUserNameDate(username, date);
+    }
+
+    public void SaveSelfAsStaff(SelfAssessStaffRequest selfAssessStaff){
+        log.info("thuc hien SaveSelfAsStaff");
+            SelfAssessStaff selfAssess=new SelfAssessStaff();
+        selfAssess.setStaff_code(selfAssessStaff.getStaff_code());
+        selfAssess.setName(selfAssessStaff.getName());
+        selfAssess.setRank(selfAssessStaff.getRank());
+        selfAssess.setGroup_rank(selfAssessStaff.getGroup_rank());
+        selfAssess.setMonth(selfAssessStaff.getMonth());
+        selfAssess.setYear(selfAssessStaff.getYear());
+        selfAssess.setKy_luat_va_thuong(selfAssessStaff.getKy_luat_va_thuong());
+        selfAssess.setMuc_do_phoi_hop(selfAssessStaff.getMuc_do_phoi_hop());
+        selfAssess.setChat_luong_chuyen_mon(selfAssessStaff.getChat_luong_chuyen_mon());
+        selfAssess.setDiem_muc_do_hoc_tap_pt(selfAssessStaff.getDiem_muc_do_hoc_tap_pt());
+        selfAssess.setNote(selfAssessStaff.getNote());
+        selfAssess.setRoom_name(selfAssessStaff.getRoom_name());
+        selfAssess.setRoom_symbol(selfAssessStaff.getRoom_symbol());
+        selfAssess.setCreated_by(selfAssessStaff.getCreated_by());
+        selfAssess.setCreated_at(selfAssessStaff.getMonth()+"/"+selfAssessStaff.getYear());
+        selfAssess.setTime_submit(LocalDate.now().toString());
+        log.info("Saving SelfAssessStaff object: {}", selfAssess);
+
+        selfAssessStaffRepository.save(selfAssess);
     }
 }

@@ -17,6 +17,7 @@ public interface StaffRepository extends JpaRepository<Staffs, Long> {
 
         @Query(value = "SELECT * from staff_list where room_name = :room_name",nativeQuery = true)
         public List<Staffs> findByRoomNameLike(@Param("room_name") String room_name);
-
+        @Query(value = "select * from staff_list where room_name = :room_name and group_work = :group", nativeQuery = true)
+        public List<Staffs> findStaffListByRoomGroupWork(String room_name, String group);
 
 }

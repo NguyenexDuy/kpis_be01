@@ -68,4 +68,9 @@ public class MemberAssessment{
 
     @Column
     private String time_submit;//ngày submit đánh giá
+    public MemberAssessment(String staff_code, String member_name, User username) {
+        this.staff_code = staff_code;
+        this.member_name = member_name;
+        this.username = username;
+    }
 }

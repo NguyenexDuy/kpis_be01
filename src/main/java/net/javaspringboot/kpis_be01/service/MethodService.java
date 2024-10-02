@@ -3,7 +3,10 @@ package net.javaspringboot.kpis_be01.service;
 import net.javaspringboot.kpis_be01.entity.MemberAssessManager;
 import net.javaspringboot.kpis_be01.entity.MemberAssessment;
 import net.javaspringboot.kpis_be01.entity.Staffs;
+import net.javaspringboot.kpis_be01.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
@@ -80,5 +83,23 @@ public class MethodService {
             average = Math.round((average/(ms))*100)/100d;//làm tròn đến 2 chữ số
         }
         return average;
+    }
+
+    public List<Staffs> getMemberListByRoomGroup(User user,Staffs staffs){
+        String room_name = user.getRoom_type().getRoom_name();
+
+        String group_work = user.getGroup_work();
+        List<Staffs> membersList= assessmentService.getStaffListByRoomGroup(room_name,group_work);
+        //dùng Iterator để remove element in list for a list size > 1,
+        // iterator will remove element in list and saved that list size after
+        Iterator<Staffs> iterator = membersList.iterator();
+        while (iterator.hasNext()){
+            Staffs s = iterator.next();
+            if (s.getUsername().getUsername().equals(staffs.getUsername().getUsername()) || s.getUsername().isStatus()==false
+                    || s.getUsername().getRole_name().getRolename().equalsIgnoreCase("manager")) {
+                iterator.remove();
+            }
+        }
+        return membersList;
     }
 }
