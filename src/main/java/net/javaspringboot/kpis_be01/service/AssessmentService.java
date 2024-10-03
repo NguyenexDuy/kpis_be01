@@ -48,6 +48,16 @@ public class AssessmentService {
     private  ResultRepo resultRepo;
     @Autowired
     private  SelfAssessStaffRepository  selfAssessStaffRepository;
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private  RankStaffRepository rankStaffRepository;
+
+    @Autowired
+    private  UserInRoleRepository userInRoleRepository;
 
 
     public  Optional<User> getUserInformation(String username){
@@ -55,6 +65,35 @@ public class AssessmentService {
     }
     public List<ManagerAssessMember> getAllResultManagerAssesMemberByRoom_Date(String room_name,String date){
         return  managerAssessRepository.getAllResultManagerAssesMemberByRoom_Date(room_name,date);
+    }
+
+    public void SaveOrUpdateRoom(RoomType roomType){roomTypeRepository.save(roomType);}
+
+    public  RoomType getRoomTypeBySymbol(String symbol){
+      return   roomTypeRepository.findRoomTypeByRoomSymbol(symbol);
+    }
+    public List<RoomType> showAllRoom(){
+        return roomTypeRepository.findAll();
+    }
+
+
+    public List<User> getAllUsersByRole(String role){return userRepository.findAllUserByRoleName(role);}
+    public void SaveOrUpdateRole(UserInRole userInRole){ userInRoleRepository.save(userInRole); }
+    public List<Staffs> getAllStaff(){
+        return  staffRepository.findAll();
+    }
+    public  List<RoomType> getAllRoomType(){
+        return roomTypeRepository.findAll();
+    }
+
+        public Role getRoleById(Long roleId) {return roleRepository.findById(roleId).get(); }
+
+    public  RankStaff getRankStaff(Long id_rank)
+    {
+        return  rankStaffRepository.findById(id_rank).get();
+    }
+    public  RoomType getRoomTypeById(Long id_roomType){
+        return  roomTypeRepository.findById(id_roomType).get();
     }
     public List<Staffs> getStaffListByRoom(String room_name){return staffRepository.findByRoomNameLike(room_name);}
 

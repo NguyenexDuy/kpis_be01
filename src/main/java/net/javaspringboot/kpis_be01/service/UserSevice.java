@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserSevice {
@@ -20,5 +19,12 @@ public class UserSevice {
 
     public User getUserByUsername(String username){
         return  userRepository.findByUsername(username).orElse(null);
+    }
+
+    public User SaveorUpdate(User object){
+     return  userRepository.save(object);
+    }
+    public User getUserNameByUniqueName(String unique_name){
+        return userRepository.getUserNameByUniqueName(unique_name);
     }
 }
