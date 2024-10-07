@@ -27,4 +27,10 @@ public class UserSevice {
     public User getUserNameByUniqueName(String unique_name){
         return userRepository.getUserNameByUniqueName(unique_name);
     }
+    public User getUserById(Long id){
+        return  userRepository.findById(id).get();
+    }
+
+
+
 }

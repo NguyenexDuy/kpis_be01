@@ -67,6 +67,9 @@ public class AssessmentService {
         return  managerAssessRepository.getAllResultManagerAssesMemberByRoom_Date(room_name,date);
     }
 
+    public  List<Role> getAllRole(){
+        return roleRepository.findAll();
+    }
     public void SaveOrUpdateRoom(RoomType roomType){roomTypeRepository.save(roomType);}
 
     public  RoomType getRoomTypeBySymbol(String symbol){
@@ -76,7 +79,10 @@ public class AssessmentService {
         return roomTypeRepository.findAll();
     }
 
-
+    public List<RankStaff> getALlRankStaff()
+    {
+        return  rankStaffRepository.findAll();
+    }
     public List<User> getAllUsersByRole(String role){return userRepository.findAllUserByRoleName(role);}
     public void SaveOrUpdateRole(UserInRole userInRole){ userInRoleRepository.save(userInRole); }
     public List<Staffs> getAllStaff(){

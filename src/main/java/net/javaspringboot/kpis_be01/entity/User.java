@@ -58,6 +58,7 @@ public class User implements Serializable {
     @JoinColumn(name="role", referencedColumnName = "rolename")
     private Role role_name;
 
+
     @ManyToOne
     @JoinColumn(name = "room_type", referencedColumnName = "room_name")
     private RoomType room_type;//tên K/P

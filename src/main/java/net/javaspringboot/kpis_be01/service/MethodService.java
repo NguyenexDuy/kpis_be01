@@ -5,8 +5,6 @@ import net.javaspringboot.kpis_be01.entity.MemberAssessment;
 import net.javaspringboot.kpis_be01.entity.Staffs;
 import net.javaspringboot.kpis_be01.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;

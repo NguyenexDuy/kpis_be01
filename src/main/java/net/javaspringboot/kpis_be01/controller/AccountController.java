@@ -1,9 +1,11 @@
 package net.javaspringboot.kpis_be01.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import net.javaspringboot.kpis_be01.dto.request.CreateNewRoomRequest;
 import net.javaspringboot.kpis_be01.dto.request.CreateUserRequest;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
+import net.javaspringboot.kpis_be01.dto.response.RankStaffResponse;
 import net.javaspringboot.kpis_be01.entity.*;
 import net.javaspringboot.kpis_be01.service.AssessmentService;
 import net.javaspringboot.kpis_be01.service.UserSevice;
@@ -20,6 +22,7 @@ import java.util.List;
 
 import static net.javaspringboot.kpis_be01.configuration.checkRoleAccount.hasRole;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin")
 public class AccountController {
@@ -48,9 +51,12 @@ public class AccountController {
 
     }
 
+
+
     //Quản lý User
     @GetMapping("/getAllUser")
     public ApiResponse<List<User>> getAllUser(){
+        log.warn("Dang thuc hien getALlUser");
         List<User> users=new ArrayList<>();
         if(hasRole("Admin")){
             users=userSevice.getAllUser();
@@ -79,6 +85,9 @@ public class AccountController {
                 iterator.remove();
             }
         }
+        for(Staffs staffs1:staffs){
+            staffs1.setRank_code(staffs1.getUsername().getRank_code().getRank_name());
+        }
         return  ApiResponse.<List<Staffs>>builder()
                 .code(1000)
                 .message("SUCCESS")
@@ -90,7 +99,10 @@ public class AccountController {
     @GetMapping("/getAllRoom")
     public  ApiResponse<List<RoomType>> getAllRoom(){
         List<RoomType> roomTypes=assessmentService.getAllRoomType();
-
+        for (RoomType roomType:roomTypes){
+            User user=userSevice.getUserByUsername(roomType.getUnique_username());
+            roomType.setUnique_username(user.getFullname());
+        }
         return  ApiResponse.<List<RoomType>>builder()
                 .message("SUCCESS")
                 .result(roomTypes)
@@ -99,6 +111,46 @@ public class AccountController {
     }
 
     //Xuất file Excel(User)
+
+    //lấy tất cả rank_staff
+    @GetMapping("/getAllRankStaff")
+    public  ApiResponse<List<RankStaffResponse>> getAllRankStaff(){
+        List<RankStaff> rankStaffs=assessmentService.getALlRankStaff();
+        List<RankStaffResponse> rankStaffResponses=new ArrayList<>();
+       for(RankStaff rank:rankStaffs){
+           RankStaffResponse rankStaffResponse=new RankStaffResponse();
+           rankStaffResponse.setId(rank.getId());
+           rankStaffResponse.setNameRank(rank.getRank_code()+"-"+rank.getRank_name());
+           rankStaffResponses.add(rankStaffResponse);
+       }
+
+       return ApiResponse.<List<RankStaffResponse>>builder()
+               .result(rankStaffResponses)
+               .code(1000)
+               .message("SUCCESS")
+               .build();
+
+    }
+
+    //lấy tất cả role
+    @GetMapping("/getAllRole")
+    public ApiResponse<List<Role>> getAllRole(){
+        List<Role> roles=assessmentService.getAllRole();
+        return  ApiResponse.<List<Role>>builder()
+                .result(roles)
+                .build();
+    }
+    //lấy tất cả roomtype
+    @GetMapping("/getAllRoomType")
+    public  ApiResponse<List<RoomType>> getAllRoomType(){
+        List<RoomType> roomTypes=assessmentService.getAllRoomType();
+        return ApiResponse.<List<RoomType>>builder()
+                .result(roomTypes)
+                .code(1000)
+                .message("SUCCESS")
+                .build();
+    }
+
     //Thêm mới(User)
     @PostMapping("/SaveAccount")
     public ApiResponse<String> SaveAccount(@RequestBody CreateUserRequest createUserRequest){
@@ -150,6 +202,24 @@ public class AccountController {
         return user;
     }
     //Edit(User)
+    @PostMapping("/saveEditUser/{id}")
+    public  ApiResponse<String> saveEditUser(@PathVariable("id") Long idUser,@RequestBody CreateUserRequest request){
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        User user=userSevice.getUserById(idUser);
+        user.setFullname(request.getFullname());
+        user.setEmail(request.getEmail());
+        user.setRank_code(assessmentService.getRankStaff(request.getRole_id()));
+        user.setGroup_work(request.getGroup_work());
+        user.setRole_name(assessmentService.getRoleById(request.getRole_id()));
+        user.setRoom_type(assessmentService.getRoomTypeById(request.getRoom_type_ID()));
+        user.setStatus(request.isStatus());
+        userSevice.SaveorUpdate(user);
+        return  ApiResponse.<String>builder()
+                .code(1000)
+                .message("SUCCESS")
+                .build();
+    }
+
     //Reset Password(User)
 
     //Xuất file Excel(Staffs)
@@ -226,6 +296,7 @@ public class AccountController {
         }
         return roomTypes;
     }
+
 
     @PostMapping("/saveEditRoom/{room_id}")
     public ApiResponse<String> saveEditRoom(@PathVariable("room_id")  Long room_id,  @RequestBody CreateNewRoomRequest request){
