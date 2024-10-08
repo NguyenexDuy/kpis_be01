@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.javaspringboot.kpis_be01.dto.request.KPIRoomListRequest;
 import net.javaspringboot.kpis_be01.dto.request.NameListKPIRequest;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
+import net.javaspringboot.kpis_be01.dto.response.RankStaffResponse;
+import net.javaspringboot.kpis_be01.dto.response.RoomTypeResponse;
 import net.javaspringboot.kpis_be01.entity.KpiRoomData;
 import net.javaspringboot.kpis_be01.entity.NameListKPI;
 import net.javaspringboot.kpis_be01.entity.RoomType;
@@ -43,6 +45,20 @@ public class KpiRoomController {
                     .result(listKPIS)
                     .code(1000)
                     .build();
+    }
+    // lấy phòng cho thêm các chỉ số kpi
+    @GetMapping("/getAllRoomForAddKPI")
+    public ApiResponse<List<RoomType>> getAllRoomForAddKPI(){
+        List<RoomType> list=assessmentService.getAllRoomType();
+        for(RoomType roomType:list){
+            roomType.setRoom_name(roomType.getRoom_name()+" ("+roomType.getRoom_symbol()+")");
+        }
+
+        return  ApiResponse.<List<RoomType>>builder()
+                .message("SUCCESS")
+                .code(1000)
+                .result(list)
+                .build();
     }
 
     //Thêm các chỉ số kpi các khoa/phòng

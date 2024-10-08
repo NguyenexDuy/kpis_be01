@@ -78,39 +78,6 @@ public class KpiRoomData implements Serializable {
     @JoinColumn(name = "username", referencedColumnName = "username")
     private User username;
 
-    public KpiRoomData(String room_report_symbol, String room_responsible_symbol) {
-        this.room_report_symbol = room_report_symbol;
-        this.room_responsible_symbol = room_responsible_symbol;
-    }
-
-    public KpiRoomData(String room_report_symbol) {
-        this.room_report_symbol = room_report_symbol;
-    }
-
-    public KpiRoomData(String kpi_name, String room_report_symbol, String room_report, String room_responsible_symbol, String room_responsible, String goal, int month, int year) {
-        this.kpi_name = kpi_name;
-        this.room_report_symbol = room_report_symbol;
-        this.room_report = room_report;
-        this.room_responsible_symbol = room_responsible_symbol;
-        this.room_responsible = room_responsible;
-        this.goal = goal;
-        this.month = month;
-        this.year = year;
-    }
-
-    public KpiRoomData(String kpi_name, String kpi_type, String room_report, String room_report_symbol, String room_responsible, String room_responsible_symbol, String goal, String compare_type, int month, int year) {
-        this.kpi_name = kpi_name;
-        this.kpi_type = kpi_type;
-        this.room_report = room_report;
-        this.room_report_symbol = room_report_symbol;
-        this.room_responsible = room_responsible;
-        this.room_responsible_symbol = room_responsible_symbol;
-        this.goal = goal;
-        this.compare_type = compare_type;
-        this.month = month;
-        this.year = year;
-    }
-
     public KpiRoomData(Long id, String kpi_name, String kpi_type, String room_report, String room_report_symbol, String room_responsible, String room_responsible_symbol, String goal, String compare_type, int month, int year) {
         this.id = id;
         this.kpi_name = kpi_name;

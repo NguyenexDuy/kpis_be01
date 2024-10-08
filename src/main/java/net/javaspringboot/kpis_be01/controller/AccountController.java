@@ -32,24 +32,7 @@ public class AccountController {
     @Autowired
     UserSevice userSevice;
 
-    public List<User> getListUser(){
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        Staffs staffs = assessmentService.getStaffByUserName(authentication.getName()).get();
 
-        List<User> usersList= userSevice.getAllUser();
-        Iterator<User> iterator = usersList.iterator();
-        while (iterator.hasNext()) {
-            User u=iterator.next();
-            if(u.getUsername().equals(staffs.getUsername().getUsername())){
-                iterator.remove();
-            }
-            if(!hasRole("Admin")&& u.getRole_name().getRolename().equalsIgnoreCase("admin")){
-                iterator.remove();
-            }
-        }
-        return usersList;
-
-    }
 
 
 
@@ -110,7 +93,6 @@ public class AccountController {
                 .build();
     }
 
-    //Xuất file Excel(User)
 
     //lấy tất cả rank_staff
     @GetMapping("/getAllRankStaff")
@@ -187,20 +169,7 @@ public class AccountController {
                 .build();
     }
 
-    public  User getUser(CreateUserRequest createUserRequest) {
-        User user=new User();
-        user.setFullname(createUserRequest.getFullname());
-        user.setPassword(createUserRequest.getPassword());
-        user.setUsername(createUserRequest.getUsername());
-        user.setEmail(createUserRequest.getEmail());
-        user.setRank_code(assessmentService.getRankStaff(createUserRequest.getRole_id()));
-        user.setGroup_work(createUserRequest.getGroup_work());
-        user.setRole_name(assessmentService.getRoleById(createUserRequest.getRole_id()));
-        user.setRoom_type(assessmentService.getRoomTypeById(createUserRequest.getRoom_type_ID()));
-        user.setStatus(createUserRequest.isStatus());
-        user.setCreated_at(Date.valueOf(LocalDate.now()));
-        return user;
-    }
+
     //Edit(User)
     @PostMapping("/saveEditUser/{id}")
     public  ApiResponse<String> saveEditUser(@PathVariable("id") Long idUser,@RequestBody CreateUserRequest request){
@@ -269,8 +238,8 @@ public class AccountController {
                 .message("SUCCESS")
                 .build();
     }
-    //Edit(khoa/phòng)
 
+    //Get all user for edit
     @GetMapping("/getAllForEdit")
     public  ApiResponse<List<User>> getAllForEdit(){
         List<User> users=assessmentService.getAllUsersByRole("Director");
@@ -285,19 +254,9 @@ public class AccountController {
                 .build();
     }
 
-    public List<RoomType> getRoomType(RoomType roomType){
-        List<RoomType> roomTypes=assessmentService.showAllRoom();
-        Iterator<RoomType> iterator = roomTypes.iterator();
-        while (iterator.hasNext()){
-            RoomType r = iterator.next();
-            if (r.getRoom_symbol().equalsIgnoreCase(roomType.getRoom_symbol())){
-                iterator.remove();
-            }
-        }
-        return roomTypes;
-    }
 
 
+    //Edit(khoa/phòng)
     @PostMapping("/saveEditRoom/{room_id}")
     public ApiResponse<String> saveEditRoom(@PathVariable("room_id")  Long room_id,  @RequestBody CreateNewRoomRequest request){
         var authentication= SecurityContextHolder.getContext().getAuthentication();
@@ -333,5 +292,51 @@ public class AccountController {
                 .code(1000)
                 .message("SUCCESS")
                 .build();
+    }
+
+    //********************************************FUNCION*************************************************
+    //********************************************************************************************************
+    public List<RoomType> getRoomType(RoomType roomType){
+        List<RoomType> roomTypes=assessmentService.showAllRoom();
+        Iterator<RoomType> iterator = roomTypes.iterator();
+        while (iterator.hasNext()){
+            RoomType r = iterator.next();
+            if (r.getRoom_symbol().equalsIgnoreCase(roomType.getRoom_symbol())){
+                iterator.remove();
+            }
+        }
+        return roomTypes;
+    }
+    public  User getUser(CreateUserRequest createUserRequest) {
+        User user=new User();
+        user.setFullname(createUserRequest.getFullname());
+        user.setPassword(createUserRequest.getPassword());
+        user.setUsername(createUserRequest.getUsername());
+        user.setEmail(createUserRequest.getEmail());
+        user.setRank_code(assessmentService.getRankStaff(createUserRequest.getRole_id()));
+        user.setGroup_work(createUserRequest.getGroup_work());
+        user.setRole_name(assessmentService.getRoleById(createUserRequest.getRole_id()));
+        user.setRoom_type(assessmentService.getRoomTypeById(createUserRequest.getRoom_type_ID()));
+        user.setStatus(createUserRequest.isStatus());
+        user.setCreated_at(Date.valueOf(LocalDate.now()));
+        return user;
+    }
+    public List<User> getListUser(){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Staffs staffs = assessmentService.getStaffByUserName(authentication.getName()).get();
+
+        List<User> usersList= userSevice.getAllUser();
+        Iterator<User> iterator = usersList.iterator();
+        while (iterator.hasNext()) {
+            User u=iterator.next();
+            if(u.getUsername().equals(staffs.getUsername().getUsername())){
+                iterator.remove();
+            }
+            if(!hasRole("Admin")&& u.getRole_name().getRolename().equalsIgnoreCase("admin")){
+                iterator.remove();
+            }
+        }
+        return usersList;
+
     }
 }
