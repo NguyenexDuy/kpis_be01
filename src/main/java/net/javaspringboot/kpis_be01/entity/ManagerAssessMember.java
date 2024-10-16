@@ -30,7 +30,6 @@ public class ManagerAssessMember {
     @Column
     private String position;//cấp nhân sự của người đc đánh giá
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user", referencedColumnName = "username")
     private User username;
@@ -85,11 +84,7 @@ public class ManagerAssessMember {
     @Column
     private String time_submit;//ngày submit đánh giá
 
-    public ManagerAssessMember(String staff_code, String member_name, String assessed_by) {
-        this.staff_code = staff_code;
-        this.member_name = member_name;
-        this.assessed_by = assessed_by;
-    }
+
 
     public ManagerAssessMember(String staff_code, String member_name, User username) {
         this.staff_code = staff_code;

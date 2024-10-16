@@ -45,7 +45,7 @@ public class KpiRoomController {
                     .result(listKPIS)
                     .code(1000)
                     .build();
-    }
+    }   
     // lấy phòng cho thêm các chỉ số kpi
     @GetMapping("/getAllRoomForAddKPI")
     public ApiResponse<List<RoomType>> getAllRoomForAddKPI(){

@@ -228,6 +228,19 @@ public class StaffController {
 
     }
 
+    //get staff by Username
+    @GetMapping("/getStaffByUserName/{userName}")
+    public  ApiResponse<Staffs> getStaffByUsername(@PathVariable String userName){
+        Staffs staff=assessmentService.getStaffByUserName(userName).get();
+
+        return ApiResponse.<Staffs>builder()
+                .result(staff)
+                .message("SUCCESS")
+                .code(1000)
+                .build();
+
+    }
+
     //tự đánh giá bản thân
     @PostMapping("/saveSelfAssessStaff")
     public ApiResponse<String> saveSelfAssessStaff(@RequestBody SelfAssessStaffRequest request){
@@ -260,7 +273,6 @@ public class StaffController {
     public ApiResponse<MemberAssessListRequest> memberAssessmentManager(@RequestParam(value = "month") int month, @RequestParam(value = "year") int year){
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         Staffs staffs = assessmentService.getStaffByUserName(authentication.getName()).get();
-
         String date =month + "/" + year;
         List<MemberAssessManager> mCheckList=assessmentService.getListMemberAssessManagerByUsernameDate(staffs.getUsername().getUsername(),date);
         List<Staffs> staffsList = assessmentService.getStaffListByRoom(staffs.getUsername().getRoom_type().getRoom_name());

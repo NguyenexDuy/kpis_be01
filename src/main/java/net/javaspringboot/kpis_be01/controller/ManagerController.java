@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static net.javaspringboot.kpis_be01.configuration.checkRoleAccount.hasRole;
 
@@ -230,10 +228,12 @@ public class ManagerController {
         var authentication= SecurityContextHolder.getContext().getAuthentication();
         String date=month+"/"+year;
         Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+
         log.info("Username:{}",authentication.getName());
         List<Staffs> leadersList = new ArrayList<>();
         //thêm leader phụ trách khoa/phòng của user đó vào phần đánh giá
-        leadersList.add(staffs);
+        Staffs staffs1=assessmentService.getStaffByUserName(staffs.getUsername().getRoom_type().getUser().getUsername()).get();
+        leadersList.add(staffs1);
 
         //loại đi lãnh đạo đã đc quản lý đánh giá trong tháng này rồi
         Iterator<Staffs> iterator = leadersList.iterator();
@@ -250,11 +250,99 @@ public class ManagerController {
             managerAssessList.getManagerAssessLeaderList().add(new ManagerAssessLeader(
                     staffss.getStaff_code(), staffss.getFullname(), staffss.getUsername()));
         }
+
+//        for(ManagerAssessLeader item: managerAssessList.getManagerAssessLeaderList()){
+//            item.getUsername().getRoom_type().setUnique_username();
+//        }
         return ApiResponse.<ManagerAssesListRequest>builder()
                 .message("SUCCESS").code(1000)
                 .result(managerAssessList)
                 .build();
     }
+
+    //tự đánh giá bản thân(Manager)
+    //đánh giá Phó khoa/phòng hoặc ĐDT/KTYT/HST
+    @GetMapping("/managerCaptainAssessment")
+    public ApiResponse<ManagerAssesListRequest> managerCaptainAssessment(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        String date=month+"/"+year;
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+
+        List<Staffs> staffsList=assessmentService.getStaffListByRoom(staffs.getUsername().getRoom_type().getRoom_name());
+        Set<Staffs> memberList=new HashSet<>();
+
+        for (Staffs s:staffsList){
+            if(s.getRank_code()!=null){
+                if(hasRole("Manager")&&(s.getRank_code().equals("VDE")||s.getRank_code().equals("VMG"))){
+                    memberList.add(s);
+                }
+                if(captain_rank_list.contains(s.getRank_code())){
+                    memberList.add(s);
+                }
+            }
+        }
+        Iterator<Staffs> iterator=memberList.iterator();
+        while (iterator.hasNext()){
+            Staffs s=iterator.next();
+            ManagerAssessMember managerCheckObj=assessmentService.getObjManagerAssessMemberByCodeRoomSymbolDate(s.getStaff_code(),s.getUsername().getRoom_type().getRoom_symbol(),date);
+            if(managerCheckObj!=null){
+                iterator.remove();
+            }
+            if (hasRole("Manager")&&(s.getUsername().getUsername().equalsIgnoreCase(staffs.getUsername().getUsername()))){
+                iterator.remove();
+            }
+        }
+        ManagerAssesListRequest managerAssessList=new ManagerAssesListRequest();
+        for(Staffs staffs1:memberList){
+            managerAssessList.getManagerAssessMemberList().add(new ManagerAssessMember(
+                    staffs1.getStaff_code(),staffs1.getFullname(),staffs1.getUsername()));
+            log.warn("username cua staff"+staffs1.getUsername().getUsername());
+        }
+        return  ApiResponse.<ManagerAssesListRequest>builder()
+                .code(1000)
+                .message("SUCCESS")
+                .result(managerAssessList)
+                .build();
+    }
+     //Trưởng nhóm đánh giá các trưởng nhóm( nếu có)
+
+    @GetMapping("/captainAssessment")
+    public  ApiResponse<ManagerAssesListRequest> captainAssessment(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        String date=month+"/"+year;
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+
+        List<Staffs> staffsList=assessmentService.getStaffListByRoom(staffs.getUsername().getRoom_type().getRoom_name());
+        Set<Staffs> memberList=new HashSet<>();
+
+        for (Staffs s:staffsList){
+            if(s.getRank_code()!=null){
+
+                if(group_rank_list.contains(s.getRank_code())||s.getUsername().getRole_name().getRolename().equals("Group_Leader")){
+                    memberList.add(s);
+                }
+            }
+        }
+        Iterator<Staffs> iterator=memberList.iterator();
+        while (iterator.hasNext()){
+            Staffs s=iterator.next();
+            ManagerAssessMember managerCheckObj=assessmentService.getObjManagerAssessMemberByCodeRoomSymbolDate(s.getStaff_code(),s.getUsername().getRoom_type().getRoom_symbol(),date);
+            if(managerCheckObj!=null){
+                iterator.remove();
+            }
+        }
+        ManagerAssesListRequest managerAssessList = new ManagerAssesListRequest();
+        for (Staffs staff : memberList) {
+            managerAssessList.getManagerAssessMemberList().add(new ManagerAssessMember(
+                    staff.getStaff_code(), staff.getFullname(), staff.getUsername()));
+        }
+        return  ApiResponse.<ManagerAssesListRequest>builder()
+                .code(1000)
+                .message("SUCCESS")
+                .result(managerAssessList)
+                .build();
+    }
+    //Trưởng/phó khoa, trưởng phòng đánh giá BS/NVVP
 
 
 

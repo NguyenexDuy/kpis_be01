@@ -38,5 +38,4 @@ public class SelfAssessStaffRequest {
     private String room_symbol;
     private String created_at;
     private  String created_by;
-    private String time_submit;
 }

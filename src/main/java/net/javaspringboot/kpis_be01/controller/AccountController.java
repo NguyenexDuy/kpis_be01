@@ -94,20 +94,16 @@ public class AccountController {
     }
 
 
-    //lấy tất cả rank_staff
+    //lấy tất cả rank_staff for edit/create
     @GetMapping("/getAllRankStaff")
-    public  ApiResponse<List<RankStaffResponse>> getAllRankStaff(){
+    public  ApiResponse<List<RankStaff>> getAllRankStaff(){
         List<RankStaff> rankStaffs=assessmentService.getALlRankStaff();
-        List<RankStaffResponse> rankStaffResponses=new ArrayList<>();
        for(RankStaff rank:rankStaffs){
-           RankStaffResponse rankStaffResponse=new RankStaffResponse();
-           rankStaffResponse.setId(rank.getId());
-           rankStaffResponse.setNameRank(rank.getRank_code()+"-"+rank.getRank_name());
-           rankStaffResponses.add(rankStaffResponse);
+           rank.setRank_name(rank.getRank_code()+"-"+rank.getRank_name());
        }
 
-       return ApiResponse.<List<RankStaffResponse>>builder()
-               .result(rankStaffResponses)
+       return ApiResponse.<List<RankStaff>>builder()
+               .result(rankStaffs)
                .code(1000)
                .message("SUCCESS")
                .build();
