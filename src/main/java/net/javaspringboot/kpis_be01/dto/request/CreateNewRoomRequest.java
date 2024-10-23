@@ -13,7 +13,5 @@ public class CreateNewRoomRequest {
     private String room_name;
     private String room_symbol;
     private String unique_username;
-    private Date created_at;
-    private String user;
 
 }

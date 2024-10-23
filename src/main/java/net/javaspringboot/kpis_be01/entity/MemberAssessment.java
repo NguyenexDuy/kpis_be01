@@ -61,7 +61,7 @@ public class MemberAssessment{
     @Column
     private int year;
 
-    @JsonIgnore
+//    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user", referencedColumnName = "username")
     private User username;

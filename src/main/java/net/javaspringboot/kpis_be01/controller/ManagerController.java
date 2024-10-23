@@ -4,13 +4,13 @@ import net.javaspringboot.kpis_be01.dto.request.ManagerAssesListRequest;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
 import net.javaspringboot.kpis_be01.entity.*;
 import net.javaspringboot.kpis_be01.service.AssessmentService;
+import net.javaspringboot.kpis_be01.service.MethodService;
+import net.javaspringboot.kpis_be01.service.UserSevice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static net.javaspringboot.kpis_be01.configuration.checkRoleAccount.hasRole;
@@ -22,6 +22,10 @@ public class ManagerController {
 
     @Autowired
    private AssessmentService assessmentService;
+    @Autowired
+    private UserSevice userSevice;
+    @Autowired
+    private MethodService methodService;
 
     //added VDR (vice director) to memberlist for view leader and manager of HRD
     private static final List<String> leader_rank_list = List.of("VDR");
@@ -261,6 +265,45 @@ public class ManagerController {
     }
 
     //tự đánh giá bản thân(Manager)
+    @PostMapping("/saveSelfAssessManager")
+    public  ApiResponse<String> saveSelfAssessManager(@RequestBody SelfAssessManager request){
+        log.info("dang thuc hien tu danh gia");
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        Staffs staffs=assessmentService.getStaffByUserName(authentication.getName()).get();
+        List<SelfAssessManager> selfAssessManagerList=assessmentService.findAllSelfAssessManagerByUserDate(staffs.getUsername().getUsername(),request.getMonth()+"/"+request.getYear());
+        for(SelfAssessManager s:selfAssessManagerList){
+            if(request.getId()==null){
+                if(s.getMonth()==request.getMonth()&&s.getYear()==request.getYear()){
+                    return ApiResponse.<String>builder()
+                            .message("UNSUCCESS")
+                            .result("Bạn đã thực hiện đánh giá tháng này rồi")
+                            .code(1100)
+                            .build();
+                }
+            }
+        }
+        User user;
+        if(request.getId()==null){
+            user=userSevice.getUserByUsername(staffs.getUsername().getUsername());
+        }
+        else {
+            user=userSevice.getUserByUsername(request.getCreated_by());
+        }
+        request.setCreated_by(user.getUsername());
+        request.setCreated_at(request.getMonth()+"/"+request.getYear());
+        request.setRoom_name(user.getRoom_type().getRoom_name());
+        request.setRoom_symbol(user.getRoom_type().getRoom_symbol());
+        request.setRank(user.getRank_code().getRank_code());
+        request.setGroup_rank(user.getRank_code().getGroup_rank_staff().getGroup_name());
+        request.setTime_submit(LocalDate.now().toString());
+        assessmentService.SaveOrUpdateSelfAssessManager(request);
+        return  ApiResponse.<String>builder()
+                .message("SUCCESS")
+                .result("Đánh giá thành công")
+                .code(1000)
+                .build();
+
+    }
     //đánh giá Phó khoa/phòng hoặc ĐDT/KTYT/HST
     @GetMapping("/managerCaptainAssessment")
     public ApiResponse<ManagerAssesListRequest> managerCaptainAssessment(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
@@ -344,6 +387,33 @@ public class ManagerController {
     }
     //Trưởng/phó khoa, trưởng phòng đánh giá BS/NVVP
 
+    //Điều dưỡng/KTY/Hộ sinh trưởng khoa đánh giá các nhân viên không có trưởng nhóm
 
+    @GetMapping("/groupAssessment")
+    public  ApiResponse<ManagerAssesListRequest> groupAssessment(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+        var authentication= SecurityContextHolder.getContext().getAuthentication();
+        String date=month+"/"+year;
+        Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+        Set<Staffs> memeberList=new HashSet<>(methodService.getMemberListByRoomGroup(staffs.getUsername(),staffs));
+        Iterator<Staffs> iterator=memeberList.iterator();
+        while (iterator.hasNext()){
+            Staffs s=iterator.next();
+            ManagerAssessMember managerCheckObj=assessmentService.getObjManagerAssessMemberByCodeRoomSymbolDate(s.getStaff_code(),s.getUsername().getRoom_type().getRoom_symbol(),date);
+            if (managerCheckObj != null){
+                iterator.remove();
+            }
+        }
+        ManagerAssesListRequest managerAssessList=new ManagerAssesListRequest();
+        for(Staffs staffs1:memeberList){
+            if(!staffs1.getRank_code().equals("VDE")&&!staffs1.getRank_code().equals("VMG")){
+                managerAssessList.getManagerAssessMemberList().add(new ManagerAssessMember(staffs1.getStaff_code(),staffs1.getFullname(),staffs1.getUsername()));
+            }
+        }
+        return  ApiResponse.<ManagerAssesListRequest>builder()
+                .code(1000)
+                .message("SUCCESS")
+                .result(managerAssessList)
+                .build();
+    }
 
 }

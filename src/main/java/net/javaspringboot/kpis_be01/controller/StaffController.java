@@ -269,7 +269,7 @@ public class StaffController {
 
 
     // đánh giá các cấp trên
-    @PostMapping("/memberAssessmentManager")
+    @GetMapping("/memberAssessmentManager")
     public ApiResponse<MemberAssessListRequest> memberAssessmentManager(@RequestParam(value = "month") int month, @RequestParam(value = "year") int year){
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         Staffs staffs = assessmentService.getStaffByUserName(authentication.getName()).get();

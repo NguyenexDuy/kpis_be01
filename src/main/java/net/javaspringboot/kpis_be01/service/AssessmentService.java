@@ -51,6 +51,7 @@ public class AssessmentService {
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 
+
     @Autowired
     private RoleRepository roleRepository;
     @Autowired
@@ -112,6 +113,9 @@ public class AssessmentService {
     }
     public List<MemberAssessment> getMark3MemberAssessByCodeRoomDate(String code, String room_name, String date){
         return memberAssessRepository.getListMarkOfMemberByCodeRoomDate(code, room_name, date);
+    }
+    public void SaveOrUpdateSelfAssessManager(SelfAssessManager s){
+        selfAssessManagerRepository.save(s);
     }
 
     public  List<MemberAssessManager> getAllResultMemberAssessManager(String room_name, String date){
@@ -189,6 +193,8 @@ public class AssessmentService {
     public  Optional<SelfAssessStaff> getObjSelfAsStaff(String username,String date){
         return  selfAccessStaffRepository.getSelfAssessStaffByUserNameDate(username, date);
     }
+    public List<SelfAssessManager> findAllSelfAssessManagerByUserDate(String created_by, String date){return selfAssessManagerRepository.findAllByUserDate(created_by, date);}
+
 
     public void SaveSelfAsStaff(SelfAssessStaffRequest selfAssessStaff){
         log.info("thuc hien SaveSelfAsStaff");

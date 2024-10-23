@@ -13,4 +13,7 @@ public interface SelfAssessManagerRepository extends JpaRepository<SelfAssessMan
 
     @Query(value = "SELECT * FROM self_assess_manager WHERE created_at = :date",nativeQuery = true)
     List<SelfAssessManager> getAllByDate(String date);
+    @Query(value = "SELECT * FROM self_assess_manager WHERE created_by = :created_by and created_at = :date",nativeQuery = true)
+    List<SelfAssessManager> findAllByUserDate(String created_by, String date);
+
 }

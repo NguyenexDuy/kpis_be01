@@ -9,6 +9,7 @@ import net.javaspringboot.kpis_be01.service.UserSevice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,10 +29,19 @@ public class UserController {
     }
 
     @GetMapping("/getUserInfomation")
-     ApiResponse<User>  getUserInfomation(){
+   public   ApiResponse<User>  getUserInfomation(){
         var authentication= SecurityContextHolder.getContext().getAuthentication();
         User user=userService.getUserByUsername(authentication.getName());
         log.info("Username:{}",authentication.getName());
+        return ApiResponse.<User>builder()
+                .code(1000)
+                .result(user)
+                .message("SUCCESS")
+                .build();
+    }
+    @GetMapping("/getUserByUniqueName/{uniqueName}")
+  public   ApiResponse<User> getUserByUniqueName(@PathVariable("uniqueName") String uniqueName){
+        User user=userService.getUserNameByUniqueName(uniqueName);
         return ApiResponse.<User>builder()
                 .code(1000)
                 .result(user)

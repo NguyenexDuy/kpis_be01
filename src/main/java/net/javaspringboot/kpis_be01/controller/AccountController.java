@@ -6,6 +6,8 @@ import net.javaspringboot.kpis_be01.dto.request.CreateNewRoomRequest;
 import net.javaspringboot.kpis_be01.dto.request.CreateUserRequest;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
 import net.javaspringboot.kpis_be01.dto.response.RankStaffResponse;
+import net.javaspringboot.kpis_be01.dto.response.RoomTypeResponse;
+import net.javaspringboot.kpis_be01.dto.response.UsserResponse;
 import net.javaspringboot.kpis_be01.entity.*;
 import net.javaspringboot.kpis_be01.service.AssessmentService;
 import net.javaspringboot.kpis_be01.service.UserSevice;
@@ -92,6 +94,30 @@ public class AccountController {
                 .code(1000)
                 .build();
     }
+    @GetMapping("/getAllRoomm")
+    public  ApiResponse<List<RoomTypeResponse>> getAllRoomDTO(){
+        List<RoomType> roomTypes=assessmentService.getAllRoomType();
+        List<RoomTypeResponse> roomTypeResponses=new ArrayList<>();
+        for (RoomType roomType:roomTypes){
+            User user = roomType.getUser();  // Lấy User từ RoomType
+            UsserResponse userDTO = new UsserResponse(user.getId(), user.getFullname(), user.getUsername(), user.getEmail());
+
+            RoomTypeResponse roomTypeDTO = new RoomTypeResponse(
+                    roomType.getRoom_id(),
+                    roomType.getRoom_name(),
+                    roomType.getRoom_symbol(),
+                    roomType.getUnique_username(),
+                    roomType.getCreated_by(),
+                    userDTO
+            );
+            roomTypeResponses.add(roomTypeDTO);
+        }
+        return  ApiResponse.<List<RoomTypeResponse>>builder()
+                .message("SUCCESS")
+                .result(roomTypeResponses)
+                .code(1000)
+                .build();
+    }
 
 
     //lấy tất cả rank_staff for edit/create
@@ -167,7 +193,7 @@ public class AccountController {
 
 
     //Edit(User)
-    @PostMapping("/saveEditUser/{id}")
+    @PutMapping("/saveEditUser/{id}")
     public  ApiResponse<String> saveEditUser(@PathVariable("id") Long idUser,@RequestBody CreateUserRequest request){
         var authentication= SecurityContextHolder.getContext().getAuthentication();
         User user=userSevice.getUserById(idUser);
@@ -186,6 +212,19 @@ public class AccountController {
     }
 
     //Reset Password(User)
+    @GetMapping("/resetPassword/{user_id}")
+    public ApiResponse<String> resetPassword(@PathVariable("user_id") Long user_id){
+        User user=userSevice.getUserById(user_id);
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodePassword = passwordEncoder.encode("123");
+        user.setPassword(encodePassword);
+        userSevice.SaveorUpdate(user);
+        return  ApiResponse.<String>builder()
+                .message("Success")
+                .code(1000)
+                .result("Change pass success")
+                .build();
+    }
 
     //Xuất file Excel(Staffs)
     //Thêm mới(Staff)
@@ -236,8 +275,8 @@ public class AccountController {
     }
 
     //Get all user for edit
-    @GetMapping("/getAllForEdit")
-    public  ApiResponse<List<User>> getAllForEdit(){
+    @GetMapping("/getAllForEditRoom")
+    public  ApiResponse<List<User>> getAllForEditRoom(){
         List<User> users=assessmentService.getAllUsersByRole("Director");
         users.addAll(assessmentService.getAllUsersByRole("Vice_Director"));
         users.add(userSevice.getUserByUsername("input"));
@@ -253,7 +292,7 @@ public class AccountController {
 
 
     //Edit(khoa/phòng)
-    @PostMapping("/saveEditRoom/{room_id}")
+    @PutMapping("/saveEditRoom/{room_id}")
     public ApiResponse<String> saveEditRoom(@PathVariable("room_id")  Long room_id,  @RequestBody CreateNewRoomRequest request){
         var authentication= SecurityContextHolder.getContext().getAuthentication();
         Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
@@ -281,6 +320,7 @@ public class AccountController {
         newRoom.setRoom_name(request.getRoom_name());
         newRoom.setRoom_symbol(request.getRoom_symbol());
         newRoom.setCreated_at(Date.valueOf(LocalDate.now()));
+        newRoom.setUnique_username(userSevice.getUserNameByUniqueName(request.getUnique_username()).getUsername());
         newRoom.setCreated_by(staffs.getUsername().getUsername());
         assessmentService.SaveOrUpdateRoom(newRoom);
 

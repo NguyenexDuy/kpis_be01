@@ -29,7 +29,7 @@ public class SecurityConfig {
                 // cho phep su dung post voi tat ca quyen
                 request.requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET,"/manager/**")
-                        .hasAnyAuthority("Manager","User")
+                        .hasAnyAuthority("Manager","Captain","User")
 
                         .requestMatchers(HttpMethod.GET,"/admin/**").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.POST,"/admin/**").hasAuthority("Admin")
