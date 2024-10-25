@@ -30,7 +30,8 @@ public class SecurityConfig {
                 request.requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET,"/manager/**")
                         .hasAnyAuthority("Manager","Captain","User")
-
+                        .requestMatchers(HttpMethod.DELETE,"/room/**").hasAuthority("Admin")
+                        .requestMatchers(HttpMethod.PUT,"/room/**").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.GET,"/admin/**").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.POST,"/admin/**").hasAuthority("Admin")
                         .requestMatchers(HttpMethod.GET,"/staff").permitAll()

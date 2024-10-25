@@ -17,6 +17,9 @@ public interface MemberAssessRepository extends JpaRepository<MemberAssessment,L
     @Query(value = "select * from member_assess",nativeQuery = true)
     List<MemberAssessment> getAllMemberAssess();
 
+    @Query(value = "select * from member_assess where unique_username = :username and created_at = :date",nativeQuery = true)
+    List<MemberAssessment> findListMemberAssessUserDate(String username, String date);
+
     @Query(value = "select * from member_assess where staff_code = :code and room_name = :room and created_at = :date",nativeQuery = true)
     List<MemberAssessment> getListMarkOfMemberByCodeRoomDate(String code, String room, String date);
 }

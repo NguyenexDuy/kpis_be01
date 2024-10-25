@@ -111,6 +111,9 @@ public class AssessmentService {
     public ManagerAssessMember getObjManagerAssessMemberByCodeRoomSymbolDate(String code, String room, String date){
         return managerAssessRepository.findObjManagerAssessMemberByCodeRoomSymbolDate(code, room, date);
     }
+    public List<MemberAssessment> getListMemberAssessByUsernameDate(String username, String date){
+        return memberAssessRepository.findListMemberAssessUserDate(username, date);
+    }
     public List<MemberAssessment> getMark3MemberAssessByCodeRoomDate(String code, String room_name, String date){
         return memberAssessRepository.getListMarkOfMemberByCodeRoomDate(code, room_name, date);
     }

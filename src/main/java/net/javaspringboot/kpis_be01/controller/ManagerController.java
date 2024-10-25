@@ -347,6 +347,54 @@ public class ManagerController {
                 .result(managerAssessList)
                 .build();
     }
+
+    //Trưởng/phó khoa, Trưởng phòng đánh giá BS/NVVP)
+        @GetMapping("/managerAssessment")
+        public ApiResponse<ManagerAssesListRequest> managerAssessment(@RequestParam(value = "month") int month,@RequestParam(value = "year") int year){
+            var authentication= SecurityContextHolder.getContext().getAuthentication();
+            String date=month+"/"+year;
+            Staffs staffs= assessmentService.getStaffByUserName(authentication.getName()).get();
+            List<Staffs> staffsList = assessmentService.getStaffListByRoom(staffs.getUsername().getRoom_type().getRoom_name());
+            //get staff by room and group work -> using Set to avoid duplicate
+            Set<Staffs> membersList = new HashSet<>(methodService.getMemberListByRoomGroup(staffs.getUsername(),staffs));
+            Iterator<Staffs> iterator = membersList.iterator();
+            while (iterator.hasNext()){
+                Staffs s = iterator.next();
+                ManagerAssessMember managerCheckObj = assessmentService.getObjManagerAssessMemberByCodeRoomSymbolDate(s.getStaff_code(),s.getUsername().getRoom_type().getRoom_symbol(),month+"/"+year);
+                if (managerCheckObj != null){
+                    iterator.remove();
+                }
+            }
+            Iterator<Staffs> iterator_rank = membersList.iterator();
+            while (iterator_rank.hasNext()){
+                Staffs s = iterator_rank.next();
+                if (s.getRank_code() != null){
+                    //ẩn đi trưởng khoa/phòng đối với phó khoa/phòng
+                    if (hasRole("Vice_Manager") && (s.getRank_code().equals("DEA") || s.getRank_code().equals("MNG"))) {
+                        iterator_rank.remove();
+                    }
+                    //ẩn đi phó khoa/phòng trong list nhân viên đc đánh giá
+//                if (vice_rank_list.contains(s.getRank_code())){
+//                    iterator_rank.remove();
+//                }
+                    //ẩn đi ddt,hst,kty trưởng khoa trong list nhân viên đc đánh giá
+                    if (captain_rank_list.contains(s.getRank_code())){
+                        iterator_rank.remove();
+                    }
+                }
+            }
+            ManagerAssesListRequest managerAssessList = new ManagerAssesListRequest();
+            for (Staffs staffs1 : membersList) {
+                managerAssessList.getManagerAssessMemberList().add(new ManagerAssessMember(
+                        staffs1.getStaff_code(), staffs1.getFullname(), staffs1.getUsername()));
+            }
+
+            return  ApiResponse.<ManagerAssesListRequest>builder()
+                    .result(managerAssessList)
+                    .code(1000)
+                    .message("SUCCESS")
+                    .build();
+        }
      //Trưởng nhóm đánh giá các trưởng nhóm( nếu có)
 
     @GetMapping("/captainAssessment")

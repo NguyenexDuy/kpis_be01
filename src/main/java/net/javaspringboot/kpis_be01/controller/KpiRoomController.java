@@ -2,6 +2,8 @@ package net.javaspringboot.kpis_be01.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.javaspringboot.kpis_be01.dto.request.EditKpiNameRequest;
+import net.javaspringboot.kpis_be01.dto.request.EditKpiRoomDataRequest;
 import net.javaspringboot.kpis_be01.dto.request.KPIRoomListRequest;
 import net.javaspringboot.kpis_be01.dto.request.NameListKPIRequest;
 import net.javaspringboot.kpis_be01.dto.response.ApiResponse;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static net.javaspringboot.kpis_be01.configuration.checkRoleAccount.hasRole;
 
@@ -177,4 +180,106 @@ public class KpiRoomController {
                 .message("SUCCESS")
                 .build();
     }
+//  edit kpi room data
+    @PutMapping("/saveUpdateKpiRoomData/{idRoomData}")
+    public ApiResponse<String> saveUpdateKpiRoomData(@PathVariable("idRoomData") Long idRoomData , @RequestBody EditKpiRoomDataRequest request){
+        Optional<KpiRoomData> kpiRoomData=kpiRoomService.getKpiRoomDataById(idRoomData);
+        if(kpiRoomData.isEmpty()){
+            return ApiResponse.<String>builder()
+                    .result("kpi room data doesn't exsist")
+                    .message("SUCCESS")
+                    .code(1000)
+                    .build();
+        }
+        KpiRoomData kpiRoomData1=kpiRoomData.get();
+        kpiRoomData1.setMs_chung(request.getMs_chung());
+        kpiRoomData1.setChi_tieu(request.getChi_tieu());
+        kpiRoomData1.setDiem_hieu_chinh(request.getDiem_hieu_chinh());
+        kpiRoomData1.setTs_thuc_hien(request.getTs_thuc_hien());
+        kpiRoomData1.setCurrency(request.getCurrency());
+        kpiRoomService.saveOrEditKpiRoomData(kpiRoomData1);
+
+        return ApiResponse.<String>builder()
+                .result("update successed")
+                .message("SUCCESS")
+                .code(1000)
+                .build();
+    }
+    //xoa kpi room data
+    @DeleteMapping("/deleteKpiRoomData/{idKpiRoomData}")
+    public ApiResponse<String> deleteKpiRoomData(@PathVariable("idKpiRoomData") Long idKpi) {
+        // Kiểm tra xem KPI có tồn tại hay không
+        Optional<KpiRoomData> kpiRoomData=kpiRoomService.getKpiRoomDataById(idKpi);
+
+        // Nếu không tìm thấy KPI với id truyền vào
+        if (kpiRoomData.isEmpty()) {
+            return ApiResponse.<String>builder()
+                    .message("FAILED")
+                    .code(1100)
+                    .result("kpi room data doesn't exist")
+                    .build();
+        }
+
+        // Nếu KPI tồn tại, thực hiện xóa
+        KpiRoomData kpiRoomData1=kpiRoomData.get();
+        kpiRoomService.deleteKpiRoomData(kpiRoomData1);
+        return ApiResponse.<String>builder()
+                .message("SUCCESS")
+                .code(1000)
+                .result("delete succeeded")
+                .build();
+    }
+
+    //Edit/update kpi name
+    @PutMapping("/saveUpdateKpiName/{idNameKpi}")
+    public  ApiResponse<String> saveUpdateKpiName(@PathVariable("idNameKpi") Long idKpi, @RequestBody EditKpiNameRequest request){
+
+        Optional<NameListKPI> nameListKPI=kpiRoomService.getNameListKPIById(idKpi);
+        if(nameListKPI.isEmpty()){
+            return  ApiResponse.<String>builder()
+                    .message("SUCCESS")
+                    .code(1100)
+                    .result("name kpi doesn't exist")
+                    .build();
+        }
+        NameListKPI nameListKPI1=nameListKPI.get();
+        nameListKPI1.setCompare_type(request.getCompare_type());
+        nameListKPI1.setNote(request.getNote());
+        nameListKPI1.setKpi_type(request.getKpi_type());
+        kpiRoomService.saveOrEdit(nameListKPI1);
+        return  ApiResponse.<String>builder()
+                .message("SUCCESS")
+                .code(1000)
+                .result("update successed")
+                .build();
+
+
+    }
+    //Xóa kpi
+    @DeleteMapping("/deleteKpiName/{idNameKpi}")
+    public ApiResponse<String> deleteKpiName(@PathVariable("idNameKpi") Long idKpi) {
+        // Kiểm tra xem KPI có tồn tại hay không
+        Optional<NameListKPI> nameListKPIOpt = kpiRoomService.getNameListKPIById(idKpi);
+
+        // Nếu không tìm thấy KPI với id truyền vào
+        if (nameListKPIOpt.isEmpty()) {
+            return ApiResponse.<String>builder()
+                    .message("FAILED")
+                    .code(1100)
+                    .result("name kpi doesn't exist")
+                    .build();
+        }
+
+        // Nếu KPI tồn tại, thực hiện xóa
+        NameListKPI nameListKPI = nameListKPIOpt.get();
+        kpiRoomService.deleteNameListKPI(nameListKPI);
+        return ApiResponse.<String>builder()
+                .message("SUCCESS")
+                .code(1000)
+                .result("delete succeeded")
+                .build();
+    }
+
+
+
 }

@@ -8,7 +8,9 @@ import net.javaspringboot.kpis_be01.repository.NameListKPIRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.naming.Name;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class KPIRoomService {
@@ -21,6 +23,22 @@ public class KPIRoomService {
     public void InsertOrUpdateNameKPI(NameListKPI nameListKPI){nameListKPIRepository.save(nameListKPI);}
 
     public List<KpiRoomData> showAllKpiRoomByDate(String date){return kpiRoomDataRepository.findAllByRoomByDate(date);}
+    public Optional<NameListKPI> getNameListKPIById(Long id){
+        return  nameListKPIRepository.findById(id);
+    }
+    public Optional<KpiRoomData> getKpiRoomDataById(Long id){ return kpiRoomDataRepository.findById(id);}
+
+    public  NameListKPI saveOrEdit(NameListKPI nameListKPI){
+        return  nameListKPIRepository.save(nameListKPI);
+    }
+    public  KpiRoomData saveOrEditKpiRoomData(KpiRoomData kpiRoomData){return  kpiRoomDataRepository.save(kpiRoomData);}
+    public  void deleteNameListKPI(NameListKPI nameListKPI){
+          nameListKPIRepository.delete(nameListKPI);
+    }
+    public  void deleteKpiRoomData(KpiRoomData kpiRoomData){
+        kpiRoomDataRepository.delete(kpiRoomData);
+    }
+
 
 
     public List<NameListKPI> getKpiNameByRoomResponsibleSymbol(String room){return nameListKPIRepository.findKPINameByRoomResponsibleSymbol(room);}
